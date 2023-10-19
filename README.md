@@ -3,9 +3,14 @@
 
 ![NexaAgent Preview](1.png)
 
+## app links: 
+### https://huggingface.co/spaces/xuyingliKepler/nexaagent
+### https://nexaagent.streamlit.app/
+
 ## Introduction
 
 NexaAgent 0.0.1 is a state-of-the-art tool designed for processing and interacting with PDF documents using advanced technologies like AutoGen, LangChain, and chromadb. Whether you're looking to extract information, answer questions, or perform any other task related to a PDF, NexaAgent is here to assist.
+
 
 ## Features
 
