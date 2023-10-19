@@ -94,13 +94,13 @@ def setup_agents(config_list, answer_function):
         "functions": [
             {
                 "name": "answer_uniswap_question",
-                "description": "Answer any Uniswap related questions",
+                "description": "Answer all paper related questions",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "question": {
                             "type": "string",
-                            "description": "The question to ask in relation to Uniswap protocol",
+                            "description": "The question to ask in relation to the document",
                         }
                     },
                     "required": ["question"],
