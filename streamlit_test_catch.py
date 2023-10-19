@@ -86,7 +86,7 @@ def answer_uniswap_question(question, qa_chain):
     return response["answer"]
 
 def setup_agents(config_list, answer_function):
-    llm_config = {
+    llm_config={
         "request_timeout": 600,
         "seed": 42,
         "config_list": config_list,
@@ -94,13 +94,13 @@ def setup_agents(config_list, answer_function):
         "functions": [
             {
                 "name": "answer_uniswap_question",
-                "description": "Answer all paper related questions",
+                "description": "Answer any questions relate to the paper",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "question": {
                             "type": "string",
-                            "description": "The question to ask in relation to the document",
+                            "description": "The question to ask in relation to the paper",
                         }
                     },
                     "required": ["question"],
