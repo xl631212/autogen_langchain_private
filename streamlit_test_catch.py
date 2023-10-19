@@ -47,13 +47,13 @@ class ExtendedUserProxyAgent(upa.UserProxyAgent):
 config_list = [
     {
         "model": "gpt-4",
-        "api_key": "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",
+        "api_key": st.secrets["OPENAI_API_KEY"]
     }
 ]
 
 gpt4_api_key = config_list[0]["api_key"]
-os.environ['OPENAI_API_KEY'] = gpt4_api_key
-openai.api_key = os.environ["OPENAI_API_KEY"]
+os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def build_vector_store(pdf_path, chunk_size=1000):
     loaders = [PyPDFLoader(pdf_path)]
