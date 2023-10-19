@@ -5,7 +5,6 @@
 
 ## app links: 
 ### https://huggingface.co/spaces/xuyingliKepler/nexaagent
-### https://nexaagent.streamlit.app/
 
 ## Introduction
 
