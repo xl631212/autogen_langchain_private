@@ -93,7 +93,7 @@ def setup_agents(config_list, answer_function):
         "temperature": 0,
         "functions": [
             {
-                "name": "answer_uniswap_question",
+                "name": "answer_question",
                 "description": "Answer any questions relate to the paper",
                 "parameters": {
                     "type": "object",
@@ -117,7 +117,7 @@ def setup_agents(config_list, answer_function):
         llm_config=llm_config,
         system_message="""Reply TERMINATE if the task has been solved at full satisfaction.
 Otherwise, reply CONTINUE, or the reason why the task is not solved yet.""",
-        function_map={"answer_function": answer_function}
+        function_map={"answer_question": answer_question}
     )
     return assistant, user_proxy
 
