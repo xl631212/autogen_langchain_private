@@ -81,7 +81,7 @@ def get_image_as_base64_string(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
     
-def answer_uniswap_question(question, qa_chain):
+def answer_question(question, qa_chain):
     response = qa_chain({"question": question})
     return response["answer"]
 
@@ -117,7 +117,7 @@ def setup_agents(config_list, answer_function):
         llm_config=llm_config,
         system_message="""Reply TERMINATE if the task has been solved at full satisfaction.
 Otherwise, reply CONTINUE, or the reason why the task is not solved yet.""",
-        function_map={"answer_uniswap_question": answer_function}
+        function_map={"answer_function": answer_function}
     )
     return assistant, user_proxy
 
