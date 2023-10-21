@@ -163,7 +163,7 @@ def app():
         - **chromadb** 🗄️
     """)
     image_path = "1.png"
-    st.sidebar.image(image_path, caption="Your Caption Here", use_column_width=True)
+    st.sidebar.image(image_path, use_column_width=True)
 
 
     # Create left and right columns
