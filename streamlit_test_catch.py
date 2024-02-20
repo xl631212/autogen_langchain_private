@@ -16,6 +16,19 @@ import openai
 import multiprocessing
 import autogen.agentchat.user_proxy_agent as upa
 
+
+config_list = [
+    {
+        "model": "gpt-4",
+        "api_key": st.secrets["OPENAI_API_KEY"]
+    }
+]
+
+gpt4_api_key = config_list[0]["api_key"]
+os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+
 class OutputCapture:
     def __init__(self):
         self.contents = []
@@ -43,17 +56,6 @@ class ExtendedUserProxyAgent(upa.UserProxyAgent):
         self.log_interaction(f"Human input: {human_input}")
         return human_input
     
-# Example usage:
-config_list = [
-    {
-        "model": "gpt-4",
-        "api_key": "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",
-    }
-]
-
-gpt4_api_key = config_list[0]["api_key"]
-os.environ['OPENAI_API_KEY'] = gpt4_api_key
-openai.api_key = os.environ["OPENAI_API_KEY"]
 
 def build_vector_store(pdf_path, chunk_size=1000):
     loaders = [PyPDFLoader(pdf_path)]
@@ -81,45 +83,9 @@ def get_image_as_base64_string(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
     
-def answer_uniswap_question(question, qa_chain):
+def answer_question(question, qa_chain):
     response = qa_chain({"question": question})
     return response["answer"]
-
-def setup_agents(config_list, answer_function):
-    llm_config = {
-        "request_timeout": 600,
-        "seed": 42,
-        "config_list": config_list,
-        "temperature": 0,
-        "functions": [
-            {
-                "name": "answer_uniswap_question",
-                "description": "Answer any Uniswap related questions",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "question": {
-                            "type": "string",
-                            "description": "The question to ask in relation to Uniswap protocol",
-                        }
-                    },
-                    "required": ["question"],
-                },
-            }
-        ],
-    }
-    assistant = autogen.AssistantAgent(name="assistant", llm_config=llm_config)
-    user_proxy = ExtendedUserProxyAgent(
-        name="user_proxy",
-        human_input_mode="NEVER",
-        max_consecutive_auto_reply=10,
-        code_execution_config={"work_dir": "."},
-        llm_config=llm_config,
-        system_message="""Reply TERMINATE if the task has been solved at full satisfaction.
-Otherwise, reply CONTINUE, or the reason why the task is not solved yet.""",
-        function_map={"answer_uniswap_question": answer_function}
-    )
-    return assistant, user_proxy
 
 def initiate_task(user_proxy, assistant, user_question):
     user_proxy.initiate_chat(
@@ -128,10 +94,50 @@ def initiate_task(user_proxy, assistant, user_question):
             )
     
 def initiate_task_process(queue, tmp_path, user_question):
-    loaders = [PyPDFLoader(tmp_path)]
     vectorstore = build_vector_store(tmp_path)
-    qa_chain = setup_qa_chain(vectorstore)
-    assistant, user_proxy = setup_agents(config_list, lambda q: answer_uniswap_question(q, qa_chain))
+    qa = setup_qa_chain(vectorstore)
+    def answer_question(question):
+        response = qa({"question": question})
+        return response["answer"]
+    llm_config={
+    "request_timeout": 600,
+    "seed": 42,
+    "config_list": config_list,
+    "temperature": 0,
+    "functions": [
+        {
+            "name": "answer_question",
+            "description": "Answer any questions in relation to the paper",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The question to ask in relation to the paper",
+                    }
+                },
+                "required": ["question"],
+            },
+        }
+    ],
+    }
+
+    # create an AssistantAgent instance named "assistant"
+    assistant = autogen.AssistantAgent(
+        name="assistant",
+        llm_config=llm_config,
+    )
+    # create a UserProxyAgent instance named "user_proxy"
+    user_proxy = autogen.UserProxyAgent(
+        name="user_proxy",
+        human_input_mode="NEVER",
+        max_consecutive_auto_reply=10,
+        code_execution_config={"work_dir": "."},
+        llm_config=llm_config,
+        system_message="""Reply TERMINATE if the task has been solved at full satisfaction.
+    Otherwise, reply CONTINUE, or the reason why the task is not solved yet.""",
+        function_map={"answer_question": answer_question}
+    )
 
     output_capture = OutputCapture()
     sys.stdout = output_capture
@@ -157,7 +163,7 @@ def app():
         - **chromadb** 🗄️
     """)
     image_path = "1.png"
-    st.sidebar.image(image_path, caption="Your Caption Here", use_column_width=True)
+    st.sidebar.image(image_path, use_column_width=True)
 
 
     # Create left and right columns
@@ -190,9 +196,3 @@ def app():
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     app()
-
-
-
-
-
-
